@@ -28,8 +28,7 @@ import org.jetbrains.annotations.Nullable;
 public class SlimeMimicBlockEntity extends BlockEntity {
 
     private BlockState blockState = Blocks.AIR.getDefaultState();
-    private SimpleInventory inventory = new SimpleInventory(SlimeMimicEntity.INVENTORY_SIZE);
-    private int size;
+    private NbtCompound mimicNbt;
 
     public SlimeMimicBlockEntity(BlockPos pos, BlockState state) {
         super(Main.SLIME_MIMIC_BLOCK_ENTITY, pos, state);
@@ -40,24 +39,19 @@ public class SlimeMimicBlockEntity extends BlockEntity {
     public void setBlockState(BlockState state){
         this.blockState = state;
     }
-    public void setInventory(SimpleInventory inv){
-        this.inventory = inv;
-    }
-    public void setSize(int size){ this.size = size; }
+    public void setMimicNbt(NbtCompound tag){ this.mimicNbt = tag; }
 
     @Override
     public void writeNbt(NbtCompound tag) {
         tag.put("BlockItem", this.blockState.getBlock().asItem().getDefaultStack().writeNbt(new NbtCompound()));
-        tag.put("Inventory", this.inventory.toNbtList());
-        tag.putInt("Size", this.size);
+        tag.put("Mimic", this.mimicNbt);
         super.writeNbt(tag);
     }
 
     @Override
     public void readNbt(NbtCompound tag) {
-        inventory.clear();
         this.setBlockState(((BlockItem) ItemStack.fromNbt(tag.getCompound("BlockItem")).getItem()).getBlock().getDefaultState());
-        this.setSize(tag.getInt("Size"));
+        this.mimicNbt = tag.getCompound("Mimic");
         super.readNbt(tag);
     }
 
@@ -88,6 +82,6 @@ public class SlimeMimicBlockEntity extends BlockEntity {
 
         this.getWorld().removeBlock(this.getPos(), false);
 
-        this.world.spawnEntity(SlimeMimicEntity.create(this.getWorld(), this.getPos(), this.inventory, this.size));
+        this.world.spawnEntity(SlimeMimicEntity.create(this.getWorld(), this.getPos(), this.mimicNbt));
     }
 }

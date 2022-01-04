@@ -34,29 +34,29 @@ public class SlimeMimicEntity extends SlimeEntity implements InventoryOwner {
 
     public static final int MIN_SIZE = 1;
     public static final int MAX_SIZE = 4;
+    public static final int INVENTORY_SIZE = 8;
+
+    public int inventory_usage = 0;
+    private final SimpleInventory inventory = new SimpleInventory(INVENTORY_SIZE);
+
 
     public SlimeMimicEntity(EntityType<? extends SlimeMimicEntity> entityType, World world) {
         super((EntityType<? extends SlimeEntity>) entityType, world);
         this.setCanPickUpLoot(true);
     }
 
-    public static SlimeMimicEntity create(World world, BlockPos pos, SimpleInventory inventory, int size) {
+    public static SlimeMimicEntity create(World world, BlockPos pos, NbtCompound tag) {
         SlimeMimicEntity entity = new SlimeMimicEntity(Main.SLIME_MIMIC, world);
+        entity.readNbt(tag);
         entity.setPosition(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5);
-        entity.inventory.readNbtList(inventory.toNbtList());
-        entity.setSize(size, false);
         return entity;
     }
-
-    public static final int INVENTORY_SIZE = 8;
-    private final SimpleInventory inventory = new SimpleInventory(INVENTORY_SIZE);
 
     @Override
     @Nullable
     //TODO This is only walk around solution, it will break in the future.
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
         this.setSize(1, true);
-
         this.getAttributeInstance(EntityAttributes.GENERIC_FOLLOW_RANGE).addPersistentModifier(new EntityAttributeModifier("Random spawn bonus", this.random.nextGaussian() * 0.05, EntityAttributeModifier.Operation.MULTIPLY_BASE));
         return entityData;
     }
@@ -101,6 +101,8 @@ public class SlimeMimicEntity extends SlimeEntity implements InventoryOwner {
                 return;
             }
 
+            this.setPersistent();
+
             this.triggerItemPickedUpByEntityCriteria(item);
             this.sendPickup(item, itemStack.getCount());
             ItemStack itemStack2 = inventory.addStack(itemStack);
@@ -111,6 +113,21 @@ public class SlimeMimicEntity extends SlimeEntity implements InventoryOwner {
             }
 
             if (!this.getWorld().isClient()) {
+                for(int i = 0; i< INVENTORY_SIZE; i++){
+                    if(this.inventory.getStack(i).isEmpty()){
+                        if(i != this.inventory_usage){
+                            this.inventory_usage = i;
+                            i = (int) Math.ceil(inventory_usage / 2.0);
+                            Main.LOGGER.warn(i);
+                            if(i > this.getSize()){
+                                Main.LOGGER.warn("GROW");
+                                this.setSize(i, false);
+                            }
+                        }
+                        break;
+                    }
+                }
+
                 if (itemStack.getItem() instanceof BlockItem) {
                     Block block = ((BlockItem) itemStack.getItem()).getBlock();
                     BlockState state = block.getDefaultState();
@@ -156,13 +173,13 @@ public class SlimeMimicEntity extends SlimeEntity implements InventoryOwner {
 
         int i = MathHelper.clamp(size, MIN_SIZE, MAX_SIZE);
 
-        this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(i * i * 2);
+        this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(10 + i * 2);
         this.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED).setBaseValue(0.2f + 0.2f * (float)i);
-        this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(i*2);
+        this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(10 + i * 2);
 
         if (heal) { this.setHealth(this.getMaxHealth()); }
 
-        this.experiencePoints = i;
+        this.experiencePoints = 10+i*2;
     }
 
     public float getScale(){
@@ -174,6 +191,11 @@ public class SlimeMimicEntity extends SlimeEntity implements InventoryOwner {
         return this.getType().getDimensions().scaled(this.getScale());
     }
 
+    @Override
+//    public boolean isSmall(){return false;}
+    protected boolean canAttack() {
+        return this.canMoveVoluntarily();
+    }
 
     public void changeToBlock(BlockState state) {
         Main.LOGGER.warn("Change To Block");
@@ -192,8 +214,7 @@ public class SlimeMimicEntity extends SlimeEntity implements InventoryOwner {
         }
 
         entity.setBlockState(state);
-        entity.setInventory(inventory);
-        entity.setSize(this.getSize());
+        entity.setMimicNbt(this.writeNbt(new NbtCompound()));
         entity.sync();
     }
 }
