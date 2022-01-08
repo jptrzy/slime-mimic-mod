@@ -47,7 +47,7 @@ public class Main implements ModInitializer {
 		SLIME_MIMIC_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, MOD_ID+":slime_mimic_block_entity", FabricBlockEntityTypeBuilder.create(SlimeMimicBlockEntity::new, SLIME_MIMIC_BLOCK).build(null));
 
 		Registry.register(Registry.BLOCK, id("slime_mimic_block"), SLIME_MIMIC_BLOCK);
-		Registry.register(Registry.ITEM, id("slime_mimic_block"), new BlockItem(SLIME_MIMIC_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
+//		Registry.register(Registry.ITEM, id("slime_mimic_block"), new BlockItem(SLIME_MIMIC_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
 
 		Registry.register(Registry.ITEM, id("slime_mimic_spawn_egg"), SLIME_MIMIC_SPAWN_EGG);
 

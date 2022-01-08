@@ -8,8 +8,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.EnchantingTableBlockEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.EvokerEntity;
 import net.minecraft.entity.mob.EvokerFangsEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
@@ -22,13 +25,16 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class SlimeMimicBlockEntity extends BlockEntity {
 
     private BlockState blockState = Blocks.AIR.getDefaultState();
     private NbtCompound mimicNbt;
+    private int ticks = 0;
 
     public SlimeMimicBlockEntity(BlockPos pos, BlockState state) {
         super(Main.SLIME_MIMIC_BLOCK_ENTITY, pos, state);
@@ -75,13 +81,27 @@ public class SlimeMimicBlockEntity extends BlockEntity {
             world.updateListeners(getPos(), getCachedState(), getCachedState(), Block.NOTIFY_ALL);
     }
 
-    public void changeToEntity(){
+    public static void tick(World world, BlockPos pos, BlockState state, SlimeMimicBlockEntity entity) {
+        if(entity.ticks > 20){
+            PlayerEntity playerEntity = world.getClosestPlayer((double)pos.getX() + 0.5, (double)pos.getY() + 0.5, (double)pos.getZ() + 0.5, 3.0, true);
+            if(playerEntity != null){
+                entity.changeToEntity(playerEntity);
+            }
+        }else{
+            entity.ticks++;
+        }
+    }
+
+    public void changeToEntity(Entity target){
         if(this.getWorld().isClient){ return; }
 
         Main.LOGGER.warn("Change to Entity");
 
         this.getWorld().removeBlock(this.getPos(), false);
 
-        this.world.spawnEntity(SlimeMimicEntity.create(this.getWorld(), this.getPos(), this.mimicNbt));
+        SlimeMimicEntity mimic = SlimeMimicEntity.create(this.getWorld(), this.getPos(), this.mimicNbt, target);
+        this.world.spawnEntity(mimic);
+
+        mimic.playSpawnEffects();
     }
 }
