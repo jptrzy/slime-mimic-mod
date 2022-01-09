@@ -139,9 +139,9 @@ public class SlimeMimicEntity extends SlimeEntity implements InventoryOwner {
                         if(i != this.inventory_usage){
                             this.inventory_usage = i;
                             i = (int) Math.ceil(inventory_usage / 2.0);
-                            Main.LOGGER.warn(i);
+//                            Main.LOGGER.debug(i);
                             if(i > this.getSize()){
-                                Main.LOGGER.warn("GROW");
+                                Main.LOGGER.debug("GROW");
                                 this.setSize(i, false, true);
                             }
                         }
@@ -175,7 +175,7 @@ public class SlimeMimicEntity extends SlimeEntity implements InventoryOwner {
 
     @Override
     public void onDeath(DamageSource source) {
-        Main.LOGGER.warn("Death");
+        Main.LOGGER.debug("Death");
         super.onDeath(source);
 
         for (int i = 0; i < INVENTORY_SIZE; i++) {
@@ -230,12 +230,12 @@ public class SlimeMimicEntity extends SlimeEntity implements InventoryOwner {
 
     @Override
     protected Identifier getLootTableId() {
-        Main.LOGGER.warn(this.getType().getLootTableId());
+        Main.LOGGER.debug(this.getType().getLootTableId());
         return this.getType().getLootTableId();
     }
 
     public void changeToBlock(BlockState state) {
-        Main.LOGGER.warn("Change To Block");
+        Main.LOGGER.debug("Change To Block");
 
         BlockPos pos = this.getBlockPos();
 
@@ -243,7 +243,7 @@ public class SlimeMimicEntity extends SlimeEntity implements InventoryOwner {
 
         for (Vec3i v : CELLS) {
             if(this.getWorld().getBlockState(pos.add(v)).isAir()){
-                Main.LOGGER.warn("Find place");
+                Main.LOGGER.debug("Find place");
                 this.remove(RemovalReason.DISCARDED);
 
                 this.getWorld().setBlockState(pos.add(v), Main.SLIME_MIMIC_BLOCK.getDefaultState());
@@ -251,6 +251,7 @@ public class SlimeMimicEntity extends SlimeEntity implements InventoryOwner {
 
                 if(entity == null){
                     Main.LOGGER.warn("Can't get blockEntity");
+                    return;
                 }
 
                 entity.setBlockState(state);

@@ -21,10 +21,6 @@ public class SlimeEntityMixin {
 
 	@Inject(at = @At("HEAD"), method = "getParticles", cancellable = true)
 	private void getParticles(CallbackInfoReturnable<ParticleEffect> cir) {
-//		Main.LOGGER.warn("FUCK");
-//		if(((SlimeEntity) (Object) this) instanceof SlimeMimicEntity){
-//			Main.LOGGER.warn("FUCK");
-//		}
 		cir.setReturnValue(ParticleTypes.DRIPPING_HONEY);
 	}
 }

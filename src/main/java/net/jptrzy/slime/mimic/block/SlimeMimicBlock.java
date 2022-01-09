@@ -64,8 +64,6 @@ public class SlimeMimicBlock extends BlockWithEntity {
         if (random.nextInt(32) != 0) return;
 
         world.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ENTITY_SILVERFISH_STEP, SoundCategory.BLOCKS, 1, 1, true);
-
-//        Main.LOGGER.warn("HELP");
     }
 
 //    @Override

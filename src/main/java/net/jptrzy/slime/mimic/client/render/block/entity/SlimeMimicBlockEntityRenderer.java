@@ -36,7 +36,7 @@ public class SlimeMimicBlockEntityRenderer implements BlockEntityRenderer<SlimeM
         matrices.push();
 
 //        int color = minecraft.getBlockColors().getColor(blockEntity.getBlockState(), blockEntity.getWorld(), blockEntity.getPos(), 0);
-//        Main.LOGGER.warn(color);
+//        Main.LOGGER.debug(color);
 
         BlockRenderManager manager = minecraft.getBlockRenderManager();
         manager.getModelRenderer().render(

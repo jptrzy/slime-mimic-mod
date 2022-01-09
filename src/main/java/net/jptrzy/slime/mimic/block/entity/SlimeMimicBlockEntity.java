@@ -95,7 +95,7 @@ public class SlimeMimicBlockEntity extends BlockEntity {
     public void changeToEntity(Entity target){
         if(this.getWorld().isClient){ return; }
 
-        Main.LOGGER.warn("Change to Entity");
+        Main.LOGGER.debug("Change to Entity");
 
         this.getWorld().removeBlock(this.getPos(), false);
 
